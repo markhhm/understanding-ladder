@@ -1,6 +1,6 @@
 ---
 name: understanding-ladder
-description: Pick the output format that makes an explanation easiest to understand, following Karpathy's understanding ladder — (1) plain controlled text, (2) diagram, (3) interactive HTML page, (4) 3Blue1Brown-style explainer video. Classify the content (definition/steps, process/causality, parameter→outcome, unfolding derivation), recommend the lowest rung that fully answers, then produce it. Works in English and Chinese. Use when the user says "explain this clearly", "help me understand", "draw a diagram", "make it interactive", "make an explainer video", "what's the best way to explain X", "understanding ladder", "Karpathy ladder", or 「讲清楚」「帮我理解」「画个图」「做个交互页」「做个讲解视频」「用哪种方式讲最好懂」「理解阶梯」; also when explaining a non-trivial concept, mechanism, algorithm, or an AI agent's output.
+description: Pick the output format that makes an explanation easiest to understand, following Karpathy's understanding ladder — (1) plain controlled text, (2) diagram, (3) interactive HTML page, (4) 3Blue1Brown-style explainer video. Classify the content (definition/steps, process/causality, parameter→outcome, unfolding derivation), recommend the lowest rung that fully answers, then produce it. Works in English and Chinese. Use when the user says "explain this clearly", "help me understand", "draw a diagram", "make it interactive", "make an explainer video", "what's the best way to explain X", "understanding ladder", "Karpathy ladder", or 「講清楚」「幫我理解」「畫個圖」「做個互動頁」「做個講解影片」「用哪種方式講最好懂」「理解階梯」; also when explaining a non-trivial concept, mechanism, algorithm, or an AI agent's output.
 ---
 
 # Understanding ladder
@@ -87,7 +87,7 @@ See [references/level-4-video.md](references/level-4-video.md). This skill **doe
 
 ## Demo mode: same content, every rung
 
-When the user says "show all rungs", "walk this from rung 1 to 4", 「逐级演示」:
+When the user says "show all rungs", "walk this from rung 1 to 4", 「逐級演示」:
 
 1. Rung 0: the usual default prose, as a baseline.
 2. Rung 1: plain text.

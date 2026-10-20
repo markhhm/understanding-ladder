@@ -59,7 +59,7 @@ Tools change fast. Open the links and confirm the install steps before recommend
    showtime new <template> <dir> --from-storyboard storyboard.md
    ```
 
-   It reads the Markdown table with `Shot | Length | Visual | Narration` or `镜头 | 时长 | 画面 | 旁白` headers, in any column order. Check `showtime --help` for the template names.
+   It reads the Markdown table with `Shot | Length | Visual | Narration` or `鏡頭 | 時長 | 畫面 | 旁白` headers, in any column order. Check `showtime --help` for the template names.
 
 4. Otherwise, a prompt ready for the video tool, e.g.:
 
