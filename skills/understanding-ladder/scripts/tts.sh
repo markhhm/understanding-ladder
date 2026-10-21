@@ -23,10 +23,11 @@ if [ -n "${ELEVENLABS_API_KEY:-}" ]; then
   else voices=JBFqnCBsd6RMkjVDRZzb; fi
   # JSON-escape in bash: python3 may be a non-working Store stub on Windows.
   esc=${text//\\/\\\\}; esc=${esc//\"/\\\"}; esc=${esc//$'\n'/\\n}; esc=${esc//$'\t'/\\t}; esc=${esc//$'\r'/}
-  body="{\"text\":\"$esc\",\"model_id\":\"${ELEVENLABS_MODEL:-eleven_v4}\"}"
+  # Sent from a file: Git Bash on Windows mangles non-ASCII command-line arguments.
+  printf '{"text":"%s","model_id":"%s"}' "$esc" "${ELEVENLABS_MODEL:-eleven_v4}" >"$tmp/body.json"
   for v in $voices; do
     if curl -fsS --max-time 60 "https://api.elevenlabs.io/v1/text-to-speech/$v" \
-        -H "xi-api-key: $ELEVENLABS_API_KEY" -H 'Content-Type: application/json' -d "$body" -o "$tmp/a.mp3" 2>/dev/null; then
+        -H "xi-api-key: $ELEVENLABS_API_KEY" -H 'Content-Type: application/json' --data-binary @"$tmp/body.json" -o "$tmp/a.mp3" 2>/dev/null; then
       src="$tmp/a.mp3"
       break
     fi
