@@ -16,6 +16,12 @@ elif command -v say >/dev/null 2>&1; then  # macOS: Meijia is a Taiwan Mandarin 
   voice=${TTS_VOICE:-$([ "$lang" = zh ] && echo Meijia || echo Samantha)}
   say -v "$voice" -o "$tmp/a.aiff" "$text"
   src="$tmp/a.aiff"
+elif command -v powershell.exe >/dev/null 2>&1; then  # Windows (Git Bash): built-in SAPI voices, e.g. Hanhan zh-TW
+  printf '%s' "$text" >"$tmp/text.txt"
+  culture=$([ "$lang" = zh ] && echo zh-TW || echo en-US)
+  win() { cygpath -w "$1" 2>/dev/null || echo "$1"; }
+  powershell.exe -NoProfile -Command "Add-Type -AssemblyName System.Speech; \$s = New-Object System.Speech.Synthesis.SpeechSynthesizer; \$v = \$s.GetInstalledVoices() | Where-Object { \$_.VoiceInfo.Culture.Name -eq '$culture' } | Select-Object -First 1; if ('${TTS_VOICE:-}') { \$s.SelectVoice('${TTS_VOICE:-}') } elseif (\$v) { \$s.SelectVoice(\$v.VoiceInfo.Name) }; \$s.SetOutputToWaveFile('$(win "$tmp/a.wav")'); \$s.Speak([IO.File]::ReadAllText('$(win "$tmp/text.txt")', [Text.Encoding]::UTF8)); \$s.Dispose()"
+  src="$tmp/a.wav"
 elif command -v espeak-ng >/dev/null 2>&1; then
   espeak-ng -v "$([ "$lang" = zh ] && echo cmn || echo en-us)" -w "$tmp/a.wav" "$text"
   src="$tmp/a.wav"

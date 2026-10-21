@@ -10,8 +10,8 @@ Karpathy is most bullish on this rung: "Create a 3b1b style video explainer on X
 
 | Need | Tool | Check |
 |---|---|---|
-| Animation | [Manim Community](https://www.manim.community/) | `manim --version` (install: `uv tool install manim --python 3.12`; macOS needs `brew install pkgconf pango cairo`) |
-| Narration | `scripts/tts.sh <zh\|en> "<text>" <out.m4a>` in this skill | ElevenLabs when `ELEVENLABS_API_KEY` is set (`ELEVENLABS_VOICE_ID` picks the voice); otherwise local: macOS `say` (Meijia for Taiwan Mandarin, Samantha for English; override with `TTS_VOICE`), else `espeak-ng`. [Kokoro](https://github.com/hexgrad/kokoro) is a better free local voice if installed |
+| Animation | [Manim Community](https://www.manim.community/) | `manim --version` (install: `uv tool install manim --python 3.12`; macOS first needs `brew install pkgconf pango cairo`; the llm-skills-manager menu item "video toolchain" does all of it on macOS and Windows) |
+| Narration | `scripts/tts.sh <zh\|en> "<text>" <out.m4a>` in this skill | ElevenLabs when `ELEVENLABS_API_KEY` is set (`ELEVENLABS_VOICE_ID` picks the voice); otherwise local: macOS `say` (Meijia for Taiwan Mandarin, Samantha for English), Windows SAPI via Git Bash (Hanhan zh-TW, Zira en-US), else `espeak-ng`; override the voice with `TTS_VOICE`. [Kokoro](https://github.com/hexgrad/kokoro) is a better free local voice if installed |
 | Mux | [ffmpeg](https://ffmpeg.org/) | `ffmpeg -version` |
 | Chinese text in Manim | a CJK font | `Text(..., font="PingFang TC")` on macOS; `Noto Sans CJK TC` on Linux |
 
