@@ -21,7 +21,9 @@ if [ -n "${ELEVENLABS_API_KEY:-}" ]; then
   if [ -n "${ELEVENLABS_VOICE_ID:-}" ]; then voices=$ELEVENLABS_VOICE_ID
   elif [ "$lang" = zh ]; then voices="9lHjugDhwqoxA5MhX0az EXAVITQu4vr4xnSDxMaL"
   else voices=JBFqnCBsd6RMkjVDRZzb; fi
-  body=$(python3 -c 'import json, sys; print(json.dumps({"text": sys.argv[1], "model_id": sys.argv[2]}))' "$text" "${ELEVENLABS_MODEL:-eleven_v4}")
+  # JSON-escape in bash: python3 may be a non-working Store stub on Windows.
+  esc=${text//\\/\\\\}; esc=${esc//\"/\\\"}; esc=${esc//$'\n'/\\n}; esc=${esc//$'\t'/\\t}; esc=${esc//$'\r'/}
+  body="{\"text\":\"$esc\",\"model_id\":\"${ELEVENLABS_MODEL:-eleven_v4}\"}"
   for v in $voices; do
     if curl -fsS --max-time 60 "https://api.elevenlabs.io/v1/text-to-speech/$v" \
         -H "xi-api-key: $ELEVENLABS_API_KEY" -H 'Content-Type: application/json' -d "$body" -o "$tmp/a.mp3" 2>/dev/null; then
