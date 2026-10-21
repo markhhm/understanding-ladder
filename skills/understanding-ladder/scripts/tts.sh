@@ -3,6 +3,7 @@
 # free voice on local compute when ElevenLabs is unset or fails (quota used up, network, bad key).
 # usage: tts.sh <zh|en> "<text>" <out.m4a>
 # env: ELEVENLABS_API_KEY, ELEVENLABS_VOICE_ID, ELEVENLABS_MODEL (or set them in ~/.config/elevenlabs/.env), TTS_VOICE
+# Default voices: Anna Su (Taiwan Mandarin, the most-used Chinese voice in the ElevenLabs library) and George (English narration).
 set -euo pipefail
 lang=$1 text=$2 out=$3
 tmp=$(mktemp -d)
@@ -15,13 +16,20 @@ if [ -z "${ELEVENLABS_API_KEY:-}" ] && [ -f "$HOME/.config/elevenlabs/.env" ]; t
 fi
 
 if [ -n "${ELEVENLABS_API_KEY:-}" ]; then
-  body=$(python3 -c 'import json, sys; print(json.dumps({"text": sys.argv[1], "model_id": sys.argv[2]}))' "$text" "${ELEVENLABS_MODEL:-eleven_multilingual_v2}")
-  if curl -fsS --max-time 60 "https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID:-21m00Tcm4TlvDq8ikWAM}" \
-      -H "xi-api-key: $ELEVENLABS_API_KEY" -H 'Content-Type: application/json' -d "$body" -o "$tmp/a.mp3"; then
-    src="$tmp/a.mp3"
-  else
-    echo "tts.sh: ElevenLabs failed (quota, network or key); using a local voice" >&2
-  fi
+  # Chinese: Anna Su needs a paid plan for API use; on the free plan the request returns 402 and the
+  # premade Sarah takes over. English: George is premade, so it works on the free plan.
+  if [ -n "${ELEVENLABS_VOICE_ID:-}" ]; then voices=$ELEVENLABS_VOICE_ID
+  elif [ "$lang" = zh ]; then voices="9lHjugDhwqoxA5MhX0az EXAVITQu4vr4xnSDxMaL"
+  else voices=JBFqnCBsd6RMkjVDRZzb; fi
+  body=$(python3 -c 'import json, sys; print(json.dumps({"text": sys.argv[1], "model_id": sys.argv[2]}))' "$text" "${ELEVENLABS_MODEL:-eleven_v4}")
+  for v in $voices; do
+    if curl -fsS --max-time 60 "https://api.elevenlabs.io/v1/text-to-speech/$v" \
+        -H "xi-api-key: $ELEVENLABS_API_KEY" -H 'Content-Type: application/json' -d "$body" -o "$tmp/a.mp3" 2>/dev/null; then
+      src="$tmp/a.mp3"
+      break
+    fi
+  done
+  [ -n "$src" ] || echo "tts.sh: ElevenLabs failed (quota, network or key); using a local voice" >&2
 fi
 
 if [ -z "$src" ]; then
