@@ -32,7 +32,7 @@ Source: Andrej Karpathy, 2026-10-02 <https://x.com/karpathy/status/2105819303471
 Rules:
 
 1. **If the user names a format, use it.** "Draw a diagram" means rung 2.
-2. **Climb.** Karpathy ranks each rung as "even better" than the one before and asks for large, custom, discardable artifacts that would never have made sense to build before: "push the boundaries here". The table above gives the *minimum* rung. Produce the highest rung the content can use and the environment can deliver (rung 3 needs a place to open HTML; rung 4 needs the toolchain in references/level-4-video.md). Stay at rung 1 only for a direct lookup: a value, a flag, a yes/no.
+2. **Climb when the goal is understanding.** This applies when the user wants to understand something: "explain", "help me understand", what an agent or a piece of code did. Ordinary answers and coding replies stay short and in text. Karpathy ranks each rung as "even better" than the one before and asks for large, custom, discardable artifacts that would never have made sense to build before: "push the boundaries here". The table above gives the *minimum* rung. Produce the highest rung the content can use and the environment can deliver (rung 3 needs a place to open HTML; rung 4 needs the toolchain in references/level-4-video.md). Stay at rung 1 only for a direct lookup: a value, a flag, a yes/no.
 3. **Mixed content: pick by the core difficulty.** If the hard part is "how a parameter changes the result", pick rung 3 even if there is a definition inside.
 4. **Then offer the next rung up.** End with one line, e.g. "Want this as a narrated rung-4 video?"
 
@@ -49,7 +49,7 @@ Open with one line that states the choice, then produce it. Do not ask "which ru
 Pick the rules by output language:
 
 - **English** → this is Karpathy's own tip: explain "in ASD-STE100", softened to "about 80% of the way". Use the `simplified-technical-english` skill (real STE: rules, approved word list, checker) in its normal, not strict, strength when it is installed; otherwise follow the rules below.
-- **Chinese** → use the `plain-chinese` skill (as a plugin it may be named `understanding-ladder:plain-chinese`). Chinese has no "ASD-STE100" to invoke, so that skill spells the rules out.
+- **Chinese** → if the `ste` skill (ste-zh) is active in this session (the user typed `/ste`), its rules win. Otherwise use the `plain-chinese` skill (as a plugin it may be named `understanding-ladder:plain-chinese`). Chinese has no "ASD-STE100" to invoke, so that skill spells the rules out.
 - **English fallback rules** ("about 80% of the way to ASD-STE100"):
   - One idea per sentence. Aim for ≤20 words in instructions, ≤25 in descriptions.
   - One term per meaning. Define a term the first time; never rotate synonyms.
@@ -66,7 +66,7 @@ Pick the rules by output language:
 See [references/level-2-diagram.md](references/level-2-diagram.md). In short:
 
 - Choose the diagram type first: flowchart, sequence, state, hierarchy, causal graph, comparison table.
-- Default to Mermaid (renders in most chat UIs and on GitHub). Use a single-file SVG/HTML when layout matters.
+- If the environment has a diagram or chart tool (an artifact or diagramming skill, a dataviz skill), build the diagram with it. Otherwise default to Mermaid (renders in most chat UIs and on GitHub). Use a single-file SVG/HTML when layout matters.
 - ≤8 words (or ≤8 Chinese characters) per box. Below the diagram, 2–4 sentences on how to read it.
 
 ### Rung 3: interactive HTML page
@@ -76,7 +76,7 @@ See [references/level-3-html.md](references/level-3-html.md). In short:
 - One self-contained HTML file. No build step; double-click to open.
 - One job: let the reader move the **1–3 parameters that matter** and see the result update live.
 - Layout: one-line takeaway → interactive area → rung-1 text → "try this" prompts → limits and what to check.
-- Save it in the working directory, tell the user the path, open it if the environment allows.
+- If the environment can publish or preview pages (an artifact tool), use it. Otherwise save it in the working directory, tell the user the path, open it if the environment allows.
 
 ### Rung 4: explainer video
 
