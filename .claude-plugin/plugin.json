@@ -1,6 +1,6 @@
 {
   "name": "understanding-ladder",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Karpathy's understanding ladder as agent skills: understanding-ladder picks text / diagram / interactive HTML / video storyboard by content type; plain-chinese spells out rung-1 rules for Chinese.",
   "author": {
     "name": "ChangWenC",
