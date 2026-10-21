@@ -2,71 +2,62 @@
 
 ## When
 
-The core of the content is a **process that unfolds over time**: a step-by-step derivation, one shape turning into another, a point moving across a surface. A page lets the reader explore; a video walks them along a planned path with narration.
+The core of the content is a **process that unfolds over time**: a step-by-step derivation, one shape turning into another, a point moving across a surface, an agent's run step by step. A page lets the reader explore; a video walks them along a planned path with narration.
 
-Video is the most expensive rung: storyboard, rendering, voice, and every fix means re-rendering. Confirm that rungs 1–3 cannot do the job first.
+Karpathy is most bullish on this rung: "Create a 3b1b style video explainer on X. Use my ElevenLabs API key for audio narration … or ask your LLM to find you decent free alternatives that use your local compute. This is actually starting to work!" So when the content suits it and the toolchain is present, **render the video**; do not stop at a plan.
 
-## What this skill does and does not do
+## Toolchain
 
-- **Does:** write the storyboard and narration, recommend a toolchain, write a prompt for those tools.
-- **Does not:** render video or install tools. Once the user has the tools, hand the storyboard to them.
+| Need | Tool | Check |
+|---|---|---|
+| Animation | [Manim Community](https://www.manim.community/) | `manim --version` (install: `uv tool install manim --python 3.12`; macOS needs `brew install pkgconf pango cairo`) |
+| Narration | `scripts/tts.sh <zh\|en> "<text>" <out.m4a>` in this skill | ElevenLabs when `ELEVENLABS_API_KEY` is set (`ELEVENLABS_VOICE_ID` picks the voice); otherwise local: macOS `say` (Meijia for Taiwan Mandarin, Samantha for English; override with `TTS_VOICE`), else `espeak-ng`. [Kokoro](https://github.com/hexgrad/kokoro) is a better free local voice if installed |
+| Mux | [ffmpeg](https://ffmpeg.org/) | `ffmpeg -version` |
+| Chinese text in Manim | a CJK font | `Text(..., font="PingFang TC")` on macOS; `Noto Sans CJK TC` on Linux |
+
+If a tool is missing, tell the user the one install command, and deliver the storyboard (Step 2) plus the fallback at the end.
 
 ## Step 1: draft first
 
-Write the full rung-1 draft and have the user confirm it is correct. An error in a video is more convincing than the same error in text, so review happens before rendering.
+Write the full rung-1 draft and have it checked. An error in a video is more convincing than the same error in text, so review happens before rendering.
 
 ## Step 2: storyboard
 
 A table, one row per shot:
 
-| Shot | Length | Visual | Narration |
-|---|---|---|---|
-| 1 | 5 s | Title card: "Why gradient descent goes downhill" | This video explains one thing: how gradient descent finds the lowest point. |
-| 2 | 10 s | A bowl-shaped surface, a ball resting on its side | Think of the loss function as a bowl. We want the bottom. |
-| 3 | 12 s | An arrow at the ball, pointing up the steepest slope | The gradient points up the steepest slope. |
-| … | … | … | … |
-| last | 6 s | Recap card: three points | To recap… |
+| Shot | Visual | Narration |
+|---|---|---|
+| 1 | Title card + a bowl-shaped curve | Gradient descent looks for the lowest point of the loss function. |
+| 2 | A ball on the slope, an arrow up the steepest slope | The gradient points up the steepest slope, so step the other way. |
+| 3 | The ball steps down to the bottom | Repeat the step, and the ball rolls to the bottom of the bowl. |
 
 Rules:
 
 1. One shot, one idea. Narration follows rung-1 rules (English ≤25 words per sentence; Chinese ≤25 characters).
 2. The visual appears before or with the narration, never after it.
-3. Open with a title card that says what is coming; close with a recap card.
-4. Plan 60–120 seconds. Estimate ~150 English words or ~200 Chinese characters per minute.
+3. Open with a title card that says what is coming; close with a recap.
+4. Plan 60–120 seconds (~150 English words or ~200 Chinese characters per minute).
 5. When a formula appears, color its symbols to match the objects on screen.
 
-## Step 3: toolchain
+## Step 3: render
 
-| Need | Tool | Notes |
-|---|---|---|
-| Let the coding agent produce the whole video | [showtime](https://github.com/FavioVazquez/showtime) | Open source, renders locally, no API keys. Early by the author's own description. **v0.4.0+ reads this skill's storyboard table directly** (see Step 4). In Claude Code: `/plugin marketplace add FavioVazquez/showtime` |
-| Hand-written math animation | [Manim Community](https://www.manim.community/) | Open-source library for 3Blue1Brown-style animation in Python |
-| Free local voice | [Kokoro](https://github.com/hexgrad/kokoro) (ONNX: [kokoro-onnx](https://github.com/thewh1teagle/kokoro-onnx)) | Local TTS, offline. Listen to the voice for your language first |
-| Paid high-quality voice | [ElevenLabs](https://elevenlabs.io/) | Needs an API key |
-| Mux video, audio, captions | [ffmpeg](https://ffmpeg.org/) | |
+Work in a fresh directory. The narration sets the timing, so record it first.
 
-Karpathy's prompt: "Create a 3b1b style video explainer on X", with ElevenLabs for narration. In the replies, people got a free route working with Manim + local Kokoro.
-
-Tools change fast. Open the links and confirm the install steps before recommending them.
+1. **Narration per shot**: `tts.sh zh "<shot N narration>" shotN.m4a` for every shot.
+2. **Durations**: read each length with `ffprobe -v error -show_entries format=duration -of csv=p=0 shotN.m4a` and save the list as `durations.json`.
+3. **Scene**: write `scene.py` with one `Scene` class. For shot N, play its animations and pad with `self.wait(...)` so the shot lasts exactly `durations[N]` seconds.
+4. **Render**: `manim -qm --disable_caching -o video.mp4 scene.py <SceneClass>` (`-ql` for a quick draft, `-qh` for the final).
+5. **Mux**: list the shots in `list.txt` (`file 'shot1.m4a'` per line), then
+   `ffmpeg -f concat -safe 0 -i list.txt -c copy narration.m4a` and
+   `ffmpeg -i media/videos/scene/<quality>/video.mp4 -i narration.m4a -c:v copy -c:a aac -shortest explainer.mp4`.
+6. **Verify**: `ffprobe explainer.mp4` shows one video and one audio stream and the expected length; grab one frame (`ffmpeg -ss <t> -i explainer.mp4 -frames:v 1 frame.png`) and look at it to confirm the text renders (no tofu boxes for Chinese).
 
 ## Step 4: deliver
 
-1. The confirmed draft.
-2. The storyboard table.
-3. **If showtime 0.4.0 or later is installed**, save the storyboard table as `storyboard.md` and hand it over directly:
+1. The `explainer.mp4` path; open it if the environment allows. The video is a discardable artifact: re-render rather than patch.
+2. The storyboard, so the user can ask for changes shot by shot.
+3. "What to check": which visuals are illustrative rather than real data; formulas and numbers to verify.
 
-   ```bash
-   showtime new <template> <dir> --from-storyboard storyboard.md
-   ```
+## Fallback: toolchain missing
 
-   It reads the Markdown table with `Shot | Length | Visual | Narration` or `鏡頭 | 時長 | 畫面 | 旁白` headers, in any column order. Check `showtime --help` for the template names.
-
-4. Otherwise, a prompt ready for the video tool, e.g.:
-
-> Create a 3b1b style video explainer on gradient descent, about 90 seconds. Follow this storyboard exactly: [paste storyboard]. Free local TTS voice. Burn in captions.
-
-5. "What to check": which visuals are illustrative rather than real data; formulas and numbers to verify before rendering.
-
-## No video tools?
-
-Fall back to rung 3: turn the storyboard into an HTML page, one card per shot, with a "next" button that plays a CSS/SVG animation and shows the narration as captions. Close to a video, at a fraction of the cost.
+Turn the storyboard into a rung-3 HTML page, one card per shot, with a "next" button that plays a CSS/SVG animation and shows the narration as captions. Add the install command for the missing tool so the next run can render the real video. [showtime](https://github.com/FavioVazquez/showtime) (v0.4.0+) can also take the storyboard table directly: `showtime new <template> <dir> --from-storyboard storyboard.md`.

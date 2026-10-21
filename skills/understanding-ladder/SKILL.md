@@ -1,6 +1,6 @@
 ---
 name: understanding-ladder
-description: Pick the output format that makes an explanation easiest to understand, following Karpathy's understanding ladder — (1) plain controlled text, (2) diagram, (3) interactive HTML page, (4) 3Blue1Brown-style explainer video. Classify the content (definition/steps, process/causality, parameter→outcome, unfolding derivation), recommend the lowest rung that fully answers, then produce it. Works in English and Chinese. Use when the user says "explain this clearly", "help me understand", "draw a diagram", "make it interactive", "make an explainer video", "what's the best way to explain X", "understanding ladder", "Karpathy ladder", or 「講清楚」「幫我理解」「畫個圖」「做個互動頁」「做個講解影片」「用哪種方式講最好懂」「理解階梯」; also when explaining a non-trivial concept, mechanism, algorithm, or an AI agent's output.
+description: Pick the output format that makes an explanation easiest to understand, following Karpathy's understanding ladder — (1) plain controlled text, (2) diagram, (3) interactive HTML page, (4) 3Blue1Brown-style explainer video. Classify the content (definition/steps, process/causality, parameter→outcome, unfolding derivation), then climb: produce the highest rung the content can use and the environment can deliver, rendering real videos when the toolchain is present. Works in English and Chinese. Use when the user says "explain this clearly", "help me understand", "draw a diagram", "make it interactive", "make an explainer video", "what's the best way to explain X", "understanding ladder", "Karpathy ladder", or 「講清楚」「幫我理解」「畫個圖」「做個互動頁」「做個講解影片」「用哪種方式講最好懂」「理解階梯」; also when explaining a non-trivial concept, mechanism, algorithm, or an AI agent's output.
 ---
 
 # Understanding ladder
@@ -32,9 +32,9 @@ Source: Andrej Karpathy, 2026-10-02 <https://x.com/karpathy/status/2105819303471
 Rules:
 
 1. **If the user names a format, use it.** "Draw a diagram" means rung 2.
-2. **Pick the lowest rung that fully answers.** If a paragraph is enough, do not build a page.
+2. **Climb.** Karpathy ranks each rung as "even better" than the one before and asks for large, custom, discardable artifacts that would never have made sense to build before: "push the boundaries here". The table above gives the *minimum* rung. Produce the highest rung the content can use and the environment can deliver (rung 3 needs a place to open HTML; rung 4 needs the toolchain in references/level-4-video.md). Stay at rung 1 only for a direct lookup: a value, a flag, a yes/no.
 3. **Mixed content: pick by the core difficulty.** If the hard part is "how a parameter changes the result", pick rung 3 even if there is a definition inside.
-4. **When unsure, go one rung lower and offer the next.** End with one line, e.g. "If you want to drag the parameter yourself, I can make this a rung-3 interactive page."
+4. **Then offer the next rung up.** End with one line, e.g. "Want this as a narrated rung-4 video?"
 
 Open with one line that states the choice, then produce it. Do not ask "which rung do you want?" unless the user asked for a recommendation:
 
@@ -48,8 +48,9 @@ Open with one line that states the choice, then produce it. Do not ask "which ru
 
 Pick the rules by output language:
 
+- **English** → this is Karpathy's own tip: explain "in ASD-STE100", softened to "about 80% of the way". Use the `simplified-technical-english` skill (real STE: rules, approved word list, checker) in its normal, not strict, strength when it is installed; otherwise follow the rules below.
 - **Chinese** → use the `plain-chinese` skill (as a plugin it may be named `understanding-ladder:plain-chinese`). Chinese has no "ASD-STE100" to invoke, so that skill spells the rules out.
-- **English** → write "about 80% of the way to ASD-STE100" (Karpathy's phrasing), with these rules made explicit:
+- **English fallback rules** ("about 80% of the way to ASD-STE100"):
   - One idea per sentence. Aim for ≤20 words in instructions, ≤25 in descriptions.
   - One term per meaning. Define a term the first time; never rotate synonyms.
   - Active voice; name who does what. Simple tenses.
@@ -79,7 +80,7 @@ See [references/level-3-html.md](references/level-3-html.md). In short:
 
 ### Rung 4: explainer video
 
-See [references/level-4-video.md](references/level-4-video.md). This skill **does not render video**. It delivers:
+See [references/level-4-video.md](references/level-4-video.md). Karpathy is most bullish on this rung ("this is actually starting to work!"), so **render the video** when the toolchain is present: Manim for animation, `scripts/tts.sh` for narration (ElevenLabs when `ELEVENLABS_API_KEY` is set, otherwise a free local voice), ffmpeg to mux. Deliver the `.mp4` path and open it. Only when a tool is missing, fall back to:
 
 - A storyboard: per shot — visual, narration (rung-1 rules), duration.
 - Tool links, e.g. [showtime](https://github.com/FavioVazquez/showtime) (open source, early; v0.4.0+ reads the storyboard table directly), [Manim](https://www.manim.community/), local TTS [Kokoro](https://github.com/thewh1teagle/kokoro-onnx).
@@ -93,7 +94,7 @@ When the user says "show all rungs", "walk this from rung 1 to 4", 「逐級演�
 2. Rung 1: plain text.
 3. Rung 2: diagram.
 4. Rung 3: interactive page (can hold rungs 0–2 as tabs in the same HTML file).
-5. Rung 4: storyboard.
+5. Rung 4: rendered video (storyboard only if the toolchain is missing).
 
 This is the best way to feel how much the format itself changes understanding.
 
@@ -105,6 +106,6 @@ Why: the ladder lowers the cost of **understanding**, not the cost of **verifica
 
 ## Do not
 
-- Climb rungs to look thorough. If rung 1 is enough, stop at rung 1.
+- Add a rung that repeats the same text in a new wrapper. Each rung must make the content easier to see: structure laid out, a parameter to move, a process animated.
 - Add facts in the diagram, page, or video that are not in the rung-1 draft. New facts go into the draft first.
 - Invent data to make a page look real. Label sample data as sample data.
